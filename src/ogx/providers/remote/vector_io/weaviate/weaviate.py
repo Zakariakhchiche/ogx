@@ -3,6 +3,7 @@
 #
 # This source code is licensed under the terms described in the LICENSE file in
 # the root directory of this source tree.
+import hashlib
 import json
 import uuid
 from typing import Any
@@ -55,8 +56,10 @@ OPENAI_VECTOR_STORES_FILES_CONTENTS_PREFIX = f"openai_vector_stores_files_conten
 
 
 def _chunk_uuid(chunk_id: str) -> str:
-    # Same value as weaviate.util.generate_uuid5(chunk_id).
-    return str(uuid.uuid5(uuid.NAMESPACE_DNS, chunk_id))
+    # Derive a UUID from the SHA-256 of chunk_id (same pattern as the Qdrant
+    # provider). SHA-256 is FIPS-compliant; uuid5 is not allowed in src/.
+    sha256_hash = hashlib.sha256(chunk_id.encode()).hexdigest()
+    return str(uuid.UUID(sha256_hash[:32]))
 
 
 class WeaviateIndex(EmbeddingIndex):

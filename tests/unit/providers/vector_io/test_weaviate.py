@@ -4,6 +4,7 @@
 # This source code is licensed under the terms described in the LICENSE file in
 # the root directory of this source tree.
 
+import hashlib
 import uuid
 from unittest.mock import MagicMock
 
@@ -21,8 +22,8 @@ from ogx_api import ChunkMetadata, EmbeddedChunk
 
 
 def _expected_uuid(chunk_id: str) -> str:
-    # weaviate.util.generate_uuid5(chunk_id) computes the same value.
-    return str(uuid.uuid5(uuid.NAMESPACE_DNS, chunk_id))
+    sha256_hash = hashlib.sha256(chunk_id.encode()).hexdigest()
+    return str(uuid.UUID(sha256_hash[:32]))
 
 
 def _chunk(chunk_id: str, content: str) -> EmbeddedChunk:
